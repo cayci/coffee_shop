@@ -1,4 +1,5 @@
 import os
+import traceback
 from flask import Flask, request, jsonify, abort
 from sqlalchemy import exc
 import json
@@ -70,20 +71,21 @@ def get_drinks_detail():
 '''
 @app.route('/drinks', methods=['POST'])
 def create_drink():
-    id = request.get('id')
-    title = request.get('title')
-    long = request.get('long')
-
-    new_drink = Drink(id=id, title=title, long=long)
+    body = request.get_json()
+    title = body.get('title')
+    recipe = json.dumps(body.get('recipe'))
+    pprint (recipe)
+    new_drink = Drink(title=title, recipe=recipe)
     try:
         db.session.add(new_drink)
         db.session.commit()
     
         return jsonify({
-            "success":True,
-            "drinks": new_drink
+            "success": True,
+            "drinks": new_drink.long()
         })
-    except:
+    except Exception as err:
+        print(traceback.format_exc())
         abort(422)
 
 '''
