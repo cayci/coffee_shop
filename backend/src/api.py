@@ -131,6 +131,33 @@ def delete_drink(drink_id):
         db.session.close()
 
 
+@app.route('/drinks/<drink_id>', methods=['PATCH'])
+def update_drink(drink_id):
+    try:
+        drink_for_update = Drink.query.filter_by(id=drink_id).all()
+        if len(drink_for_update) == 1:
+            body=request.get_json()
+            title = body.get("title")
+            recipe = body.get("recipe")
+            if title is not None: 
+                drink_for_update[0].title = title
+            if recipe is not None:
+                drink_for_update[0].recipe = json.dumps(recipe)
+            db.session.commit()
+            return jsonify({
+                "success":True,
+                "updated":drink_id
+            })
+        else:
+            abort(404)
+    except Exception as err:
+        print(traceback.format_exc())
+        db.session.rollback()
+        abort(422)
+    finally:
+        db.session.close()
+
+
 # Error Handling
 '''
 Example error handling for unprocessable entity
@@ -161,9 +188,23 @@ def unprocessable(error):
 @TODO implement error handler for 404
     error handler should conform to general task above
 '''
+@app.errorhandler(404)
+def not_found_error(error):
+    return jsonify({
+        "success": False,
+        "error": 404,
+        "message": "resource not found"
+    }), 404
 
 
 '''
 @TODO implement error handler for AuthError
     error handler should conform to general task above
 '''
+@app.errorhandler(401)
+def unauthorized_error(error):
+    return jsonify({
+        "success": False,
+        "error": 401,
+        "message": "unauthorized"
+    }), 401
