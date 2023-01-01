@@ -30,6 +30,7 @@ db_drop_and_create_all()
         or appropriate status code indicating reason for failure
 '''
 @app.route('/drinks', methods=['GET'])
+@requires_auth('get:drinks')
 def get_drinks():
     drinks=Drink.query.order_by(Drink.title).all()
     formatted_drinks=[]
@@ -49,6 +50,7 @@ def get_drinks():
         or appropriate status code indicating reason for failure
 '''
 @app.route('/drinks-detail', methods=['GET'])
+@requires_auth('get:drinks-detail')
 def get_drinks_detail():
     
     drinks=Drink.query.order_by(Drink.title).all()
@@ -70,11 +72,11 @@ def get_drinks_detail():
         or appropriate status code indicating reason for failure
 '''
 @app.route('/drinks', methods=['POST'])
+@requires_auth('post:drinks')
 def create_drink():
     body = request.get_json()
     title = body.get('title')
     recipe = json.dumps(body.get('recipe'))
-    pprint (recipe)
     new_drink = Drink(title=title, recipe=recipe)
     try:
         db.session.add(new_drink)
@@ -112,6 +114,7 @@ def create_drink():
         or appropriate status code indicating reason for failure
 '''
 @app.route('/drinks/<drink_id>', methods=['DELETE'])
+@requires_auth('delete:drinks')
 def delete_drink(drink_id):
     try:
         drink_for_deletion = Drink.query.filter_by(id=drink_id).all()
@@ -132,6 +135,7 @@ def delete_drink(drink_id):
 
 
 @app.route('/drinks/<drink_id>', methods=['PATCH'])
+@requires_auth('patch:drinks')
 def update_drink(drink_id):
     try:
         drink_for_update = Drink.query.filter_by(id=drink_id).all()
